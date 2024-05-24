@@ -259,7 +259,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             this.editor.updateShape({
               id: shape.id,
               type: "preview",
-              props: { ...shape.props, url: newUrl, html: undefined },
+              props: { ...shape.props, url: newUrl, html: null },
             });
           }}
         >
@@ -274,6 +274,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
         <iframe
           id={`iframe-1-${shape.id}`}
           onLoad={(e) => {
+            console.log("onLoad");
             const iframe = e.target as HTMLIFrameElement;
             const html = iframe.contentDocument?.documentElement.outerHTML;
             if (html === `<html><head></head><body></body></html>`) {
