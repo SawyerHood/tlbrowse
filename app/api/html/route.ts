@@ -1,6 +1,7 @@
 import { createClient } from "@/ai/client";
 import { system } from "@/ai/prompt";
 import { NextRequest } from "next/server";
+import { streamHtml } from "openai-html-stream";
 
 import {
   ChatCompletionCreateParamsStreaming,
@@ -12,58 +13,15 @@ export async function GET(req: NextRequest) {
   const url = params.get("url")!;
   const rawDeps = params.get("deps") || "[]";
   const deps = JSON.parse(rawDeps);
+  const programStream = await createProgramStream({
+    url,
+    deps: deps.filter((dep: { url: string }) => dep.url !== url),
+  });
 
   return new Response(
-    new ReadableStream({
-      async start(controller) {
-        try {
-          const programStream = await createProgramStream({
-            url,
-            deps: deps.filter((dep: { url: string }) => dep.url !== url),
-          });
-
-          let programResult = "";
-
-          let startedSending = false;
-          let sentIndex = 0;
-
-          for await (const chunk of programStream) {
-            const value = chunk.choices[0]?.delta?.content || "";
-
-            programResult += value;
-
-            if (startedSending) {
-              const match = programResult.match(/<\/html>/);
-              if (match) {
-                controller.enqueue(
-                  programResult.slice(sentIndex, match.index! + match[0].length)
-                );
-                break;
-              } else {
-                controller.enqueue(value);
-                sentIndex = programResult.length;
-              }
-            } else {
-              const match = programResult.match(/<head>/);
-              if (match) {
-                programResult =
-                  `<!DOCTYPE html><html><head><script src="/bootstrap.js"></script>\n` +
-                  programResult.slice(match.index! + match[0].length);
-                controller.enqueue(programResult);
-                sentIndex = programResult.length;
-                startedSending = true;
-              }
-            }
-          }
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          controller.close();
-        } catch (e) {
-          console.error(e);
-          controller.error(e);
-          controller.close();
-        }
-      },
-    }).pipeThrough(new TextEncoderStream()),
+    streamHtml(programStream, {
+      injectIntoHead: '<script src="/bootstrap.js"></script>',
+    }),
     {
       headers: {
         "Content-Type": "text/html",
