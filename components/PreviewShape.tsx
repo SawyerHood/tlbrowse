@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BaseBoxShapeUtil,
   HTMLContainer,
-  SvgExportContext,
   TLArrowShapeProps,
   TLBaseShape,
   TLShape,
