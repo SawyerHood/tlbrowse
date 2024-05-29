@@ -269,7 +269,14 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
           target={`iframe-1-${shape.id}`}
           className="flex items-center p-2 bg-gray-100 border-b border-gray-300 w-full"
           onSubmit={(e) => {
-            // e.preventDefault();
+            formRef.current?.submit();
+            const newUrl = formRef.current?.url.value;
+            setIsLoading(true);
+            this.editor.updateShape({
+              id: shape.id,
+              type: "preview",
+              props: { ...shape.props, url: newUrl, html: null },
+            });
           }}
         >
           <span className="text-gray-600 text-sm">URL:</span>
