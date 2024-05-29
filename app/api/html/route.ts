@@ -8,14 +8,15 @@ import {
   ChatCompletionMessageParam,
 } from "openai/resources/index.mjs";
 
-export async function GET(req: NextRequest) {
-  const params = req.nextUrl.searchParams;
-  const url = params.get("url")!;
-  const rawDeps = params.get("deps") || "[]";
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
+  const url = formData.get("url")! as string;
+  const rawDeps = (formData.get("deps") as string) || "[]";
   const deps = JSON.parse(rawDeps);
   const programStream = await createProgramStream({
     url,
-    deps: deps.filter((dep: { url: string }) => dep.url !== url),
+    // Keep only the last 3 deps
+    deps: deps.filter((dep: { url: string }) => dep.url !== url).slice(-3),
   });
 
   return new Response(

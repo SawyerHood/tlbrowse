@@ -147,7 +147,21 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
   override component(shape: PreviewShape) {
     const isEditing = useIsEditing(shape.id);
     const ref = useRef<HTMLIFrameElement>(null);
-    const [isLoading, setIsLoading] = useState(!!shape.props.url);
+    const [isLoading, setIsLoading] = useState(false);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    useEffect(() => {
+      if (shape.props.url && !shape.props.html && !isLoading) {
+        formRef.current?.submit();
+        const newUrl = formRef.current?.url.value;
+        setIsLoading(true);
+        this.editor.updateShape({
+          id: shape.id,
+          type: "preview",
+          props: { ...shape.props, url: newUrl, html: null },
+        });
+      }
+    }, [shape.props, shape.id, isLoading]);
 
     useEffect(() => {
       const iframe = ref.current;
@@ -219,20 +233,18 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
       [this.editor]
     );
 
+    // The deps are in top to bottom order
     const depsParams = useValue(
       "deps",
       () => {
         const ancestors = this.getAncestors(shape.id);
-        let deps = ancestors.map((s) => {
+        const deps = ancestors.map((s) => {
           return {
             url: (s.props as PreviewShape["props"]).url,
             html: (s.props as PreviewShape["props"]).html,
           };
         });
-        deps = deps[deps.length - 2] ? [deps[deps.length - 2]] : [];
-        const param = encodeURIComponent(JSON.stringify(deps));
-        console.log(param);
-        console.log(JSON.parse(decodeURIComponent(param)));
+        const param = JSON.stringify(deps);
         return param;
       },
       [shape.id]
@@ -251,16 +263,13 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
       >
         {isLoading && <LoadingBar />}
         <form
+          method="POST"
+          ref={formRef}
+          action="/api/html"
+          target={`iframe-1-${shape.id}`}
           className="flex items-center p-2 bg-gray-100 border-b border-gray-300 w-full"
           onSubmit={(e) => {
-            e.preventDefault();
-            const newUrl = (e.target as HTMLFormElement).url.value;
-            setIsLoading(true);
-            this.editor.updateShape({
-              id: shape.id,
-              type: "preview",
-              props: { ...shape.props, url: newUrl, html: null },
-            });
+            // e.preventDefault();
           }}
         >
           <span className="text-gray-600 text-sm">URL:</span>
@@ -270,11 +279,12 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             className="flex-1 ml-2 p-1 text-gray-800 text-sm border-none bg-white"
             defaultValue={url}
           />
+          <input type="hidden" name="deps" value={depsParams} />
         </form>
         <iframe
+          name={`iframe-1-${shape.id}`}
           id={`iframe-1-${shape.id}`}
           onLoad={(e) => {
-            console.log("onLoad");
             const iframe = e.target as HTMLIFrameElement;
             const html = iframe.contentDocument?.documentElement.outerHTML;
             if (html === `<html><head></head><body></body></html>`) {
@@ -287,11 +297,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             });
             setIsLoading(false);
           }}
-          src={
-            url && !shape.props.html
-              ? `/api/html?url=${encodeURIComponent(url)}&deps=${depsParams}`
-              : ""
-          }
           srcDoc={shape.props.html ?? undefined}
           width={toDomPrecision(shape.props.w)}
           height={toDomPrecision(shape.props.h)}
@@ -336,47 +341,6 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
     );
   }
 
-  override toSvg(shape: PreviewShape, _ctx: SvgExportContext) {
-    // while screenshot is the same as the old one, keep waiting for a new one
-    return new Promise<ReactElement>((resolve, reject) => {
-      if (window === undefined) {
-        reject();
-        return;
-      }
-
-      const windowListener = (event: MessageEvent) => {
-        if (event.data.screenshot && event.data?.shapeid === shape.id) {
-          // const image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
-          // image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', event.data.screenshot)
-          // image.setAttribute('width', shape.props.w.toString())
-          // image.setAttribute('height', shape.props.h.toString())
-          // g.appendChild(image)
-          window.removeEventListener("message", windowListener);
-          clearTimeout(timeOut);
-
-          resolve(<PreviewImage href={event.data.screenshot} shape={shape} />);
-        }
-      };
-      const timeOut = setTimeout(() => {
-        reject();
-        window.removeEventListener("message", windowListener);
-      }, 2000);
-      window.addEventListener("message", windowListener);
-      //request new screenshot
-      const firstLevelIframe = document.getElementById(
-        `iframe-1-${shape.id}`
-      ) as HTMLIFrameElement;
-      if (firstLevelIframe) {
-        firstLevelIframe.contentWindow!.postMessage(
-          { action: "take-screenshot", shapeid: shape.id },
-          "*"
-        );
-      } else {
-        console.log("first level iframe not found or not accessible");
-      }
-    });
-  }
-
   indicator(shape: PreviewShape) {
     return <rect width={shape.props.w} height={shape.props.h} />;
   }
@@ -409,16 +373,6 @@ function getRotatedBoxShadow(rotation: number) {
     return `${x}px ${y}px ${blur}px ${spread}px ${color}`;
   });
   return cssStrings.join(", ");
-}
-
-function PreviewImage({ shape, href }: { shape: PreviewShape; href: string }) {
-  return (
-    <image
-      href={href}
-      width={shape.props.w.toString()}
-      height={shape.props.h.toString()}
-    />
-  );
 }
 
 function LoadingBar() {
