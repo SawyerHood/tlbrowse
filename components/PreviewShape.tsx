@@ -12,6 +12,9 @@ import {
   useIsEditing,
   useValue,
 } from "tldraw";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Play, RefreshCw, RotateCw } from "lucide-react";
 
 export type PreviewShape = TLBaseShape<
   "preview",
@@ -152,8 +155,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
     useEffect(() => {
       if (shape.props.url && !shape.props.html && !isLoading) {
         formRef.current?.submit();
-        const newUrl = formRef.current?.url.value;
         setIsLoading(true);
+        const newUrl = formRef.current?.url.value;
         this.editor.updateShape({
           id: shape.id,
           type: "preview",
@@ -253,11 +256,12 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
     return (
       <HTMLContainer
-        className="tl-embed-container flex flex-col rounded"
+        className="tl-embed-container flex flex-col border"
         id={shape.id}
         style={{
           boxShadow,
-          border: "1px solid var(--color-panel-contrast)",
+          width: toDomPrecision(shape.props.w),
+          height: toDomPrecision(shape.props.h),
         }}
       >
         {isLoading && <LoadingBar />}
@@ -266,11 +270,10 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
           ref={formRef}
           action="/api/html"
           target={`iframe-1-${shape.id}`}
-          className="flex items-center p-2 bg-gray-100 border-b border-gray-300 w-full"
+          className="flex items-center p-2 w-full gap-2 bg-background border-b"
           onSubmit={(e) => {
-            formRef.current?.submit();
+            e.preventDefault();
             const newUrl = formRef.current?.url.value;
-            setIsLoading(true);
             this.editor.updateShape({
               id: shape.id,
               type: "preview",
@@ -278,14 +281,38 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             });
           }}
         >
-          <span className="text-gray-600 text-sm">URL:</span>
-          <input
-            name="url"
-            type="text"
-            className="flex-1 ml-2 p-1 text-gray-800 text-sm border-none bg-white"
-            defaultValue={url}
-          />
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            onMouseDown={() => {
+              const newUrl = formRef.current?.url.value;
+              this.editor.updateShape({
+                id: shape.id,
+                type: "preview",
+                props: { ...shape.props, url: newUrl, html: null },
+              });
+            }}
+          >
+            <RotateCw />
+          </Button>
+          <Input name="url" type="text" defaultValue={url} />
           <input type="hidden" name="deps" value={depsParams} />
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            onMouseDown={() => {
+              const newUrl = formRef.current?.url.value;
+              this.editor.updateShape({
+                id: shape.id,
+                type: "preview",
+                props: { ...shape.props, url: newUrl, html: null },
+              });
+            }}
+          >
+            <Play />
+          </Button>
         </form>
         <iframe
           name={`iframe-1-${shape.id}`}
@@ -304,8 +331,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             setIsLoading(false);
           }}
           srcDoc={shape.props.html ?? undefined}
-          width={toDomPrecision(shape.props.w)}
-          height={toDomPrecision(shape.props.h)}
+          width="100%"
+          height="100%"
           draggable={false}
           style={{
             pointerEvents: isEditing ? "auto" : "none",

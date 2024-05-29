@@ -1,10 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-// import "tldraw/tldraw.css";
 import { PreviewShapeUtil } from "@/components/PreviewShape";
 import { useEditor } from "tldraw";
-// import { Tldraw } from "tldraw";
+import { useEffect } from "react";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -16,33 +15,55 @@ export default function Home() {
   return (
     <div style={{ position: "fixed", inset: 0 }}>
       <Tldraw
-        persistenceKey="wow"
+        persistenceKey="tlweb"
         shapeUtils={shapeUtils}
+        hideUi={false}
         components={{
-          SharePanel: () => <InsertPageButton />,
+          Toolbar: null,
+          PageMenu: null,
+          MainMenu: null,
+          StylePanel: null,
+          DebugPanel: null,
         }}
-      ></Tldraw>
+      >
+        <UI />
+      </Tldraw>
     </div>
   );
 }
 
-function InsertPageButton() {
+function UI() {
   const editor = useEditor();
-  return (
-    <button
-      className="bg-blue-500 text-white font-bold py-2 px-4 rounded m-2 pointer-events-auto"
-      onClick={() =>
-        editor.createShape({
-          type: "preview",
-          props: {
-            url: "",
-            width: 100,
-            height: 100,
-          },
-        })
-      }
-    >
-      Insert Browser
-    </button>
-  );
+  useEffect(() => {
+    if (editor.getCurrentPageShapeIds().size === 0) {
+      editor.createShape({
+        type: "preview",
+        props: {
+          url: "",
+        },
+      });
+    }
+  }, [editor]);
+
+  return null;
 }
+
+// function InsertPageButton() {
+//   return (
+//     <button
+//       className="bg-blue-500 text-white font-bold py-2 px-4 rounded m-2 pointer-events-auto"
+//       onClick={() =>
+//         editor.createShape({
+//           type: "preview",
+//           props: {
+//             url: "",
+//             width: 100,
+//             height: 100,
+//           },
+//         })
+//       }
+//     >
+//       Insert Browser
+//     </button>
+//   );
+// }

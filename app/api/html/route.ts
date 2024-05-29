@@ -63,14 +63,14 @@ async function createProgramStream({
         content: url,
       },
     ],
-    model: "gpt-4o",
+    model: "codestral-latest",
     stream: true,
   };
 
   console.log(params);
 
   const stream = await createClient(
-    process.env.OPENAI_API_KEY!
+    process.env.MISTRAL_API_KEY!
   ).chat.completions.create(params);
 
   return stream;
