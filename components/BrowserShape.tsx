@@ -257,9 +257,9 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
     // Function to handle the download of the iframe content
     const handleDownload = () => {
       if (!shape.props.html) return;
-      const blob = new Blob([shape.props.html], { type: 'text/html' });
+      const blob = new Blob([shape.props.html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = "download.html";
       document.body.appendChild(link);
@@ -294,6 +294,9 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             });
           }}
         >
+          <Button variant="ghost" size="icon" onMouseDown={handleDownload}>
+            <Download />
+          </Button>
           <Button
             type="submit"
             variant="ghost"
@@ -330,13 +333,6 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             }}
           >
             <Play />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleDownload}
-          >
-            <Download />
           </Button>
         </form>
         <iframe
