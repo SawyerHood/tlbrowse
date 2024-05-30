@@ -16,7 +16,11 @@ export async function POST(req: NextRequest) {
   const programStream = await createProgramStream({
     url,
     // Keep only the last 3 deps
-    deps: deps.filter((dep: { url: string }) => dep.url !== url).slice(-3),
+    deps: deps
+      .filter(
+        (dep: { url: string; html?: string }) => dep.html && dep.url !== url
+      )
+      .slice(-3),
   });
 
   return new Response(
@@ -63,14 +67,13 @@ async function createProgramStream({
         content: url,
       },
     ],
-    model: "codestral-latest",
+    model: "claude-3-haiku-20240307",
     stream: true,
+    max_tokens: 4000,
   };
 
-  console.log(params);
-
   const stream = await createClient(
-    process.env.MISTRAL_API_KEY!
+    process.env.BRAINTRUST_API_KEY!
   ).chat.completions.create(params);
 
   return stream;

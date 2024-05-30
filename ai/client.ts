@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 export const createClient = (key: string) => {
   return new OpenAI({
-    baseURL: "https://codestral.mistral.ai/v1",
+    baseURL: "https://braintrustproxy.com/v1",
     apiKey: key,
   });
 };

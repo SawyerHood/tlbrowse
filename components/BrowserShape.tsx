@@ -16,8 +16,8 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Play, RefreshCw, RotateCw } from "lucide-react";
 
-export type PreviewShape = TLBaseShape<
-  "preview",
+export type BrowserShape = TLBaseShape<
+  "browser",
   {
     url: string;
     w: number;
@@ -27,10 +27,10 @@ export type PreviewShape = TLBaseShape<
   }
 >;
 
-export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
-  static override type = "preview" as const;
+export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
+  static override type = "browser" as const;
 
-  getDefaultProps(): PreviewShape["props"] {
+  getDefaultProps(): BrowserShape["props"] {
     return {
       url: "",
       w: (960 * 2) / 3,
@@ -40,9 +40,9 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
   }
 
   override canEdit = () => true;
-  override isAspectRatioLocked = (_shape: PreviewShape) => false;
-  override canResize = (_shape: PreviewShape) => true;
-  override canBind = (_shape: PreviewShape) => true;
+  override isAspectRatioLocked = (_shape: BrowserShape) => false;
+  override canResize = (_shape: BrowserShape) => true;
+  override canBind = (_shape: BrowserShape) => true;
 
   getRootShapeId(shapeId: TLShapeId): TLShapeId {
     const parentArrow = this.editor
@@ -115,7 +115,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
     }
 
     const root = layers[0][0];
-    const centerX = root.x + (root.props as PreviewShape["props"]).w / 2;
+    const centerX = root.x + (root.props as BrowserShape["props"]).w / 2;
 
     const spacingX = 100; // Define the spacing between shapes
     const spacingY = 200; // Define the spacing between shapes
@@ -124,7 +124,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
 
     layers.forEach((layer, depth) => {
       const totalWidth = layer.reduce(
-        (sum, shape) => sum + (shape.props as PreviewShape["props"]).w,
+        (sum, shape) => sum + (shape.props as BrowserShape["props"]).w,
         0
       );
       const totalSpacing = (layer.length - 1) * spacingX;
@@ -134,19 +134,19 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
       layer.forEach((shape) => {
         this.editor.updateShape({
           id: shape.id,
-          type: "preview",
+          type: "browser",
           x: currentX,
           y:
             startY +
-            depth * ((shape.props as PreviewShape["props"]).h + spacingY),
+            depth * ((shape.props as BrowserShape["props"]).h + spacingY),
         });
 
-        currentX += (shape.props as PreviewShape["props"]).w + spacingX;
+        currentX += (shape.props as BrowserShape["props"]).w + spacingX;
       });
     });
   }
 
-  override component(shape: PreviewShape) {
+  override component(shape: BrowserShape) {
     const isEditing = useIsEditing(shape.id);
     const ref = useRef<HTMLIFrameElement>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -159,7 +159,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
         const newUrl = formRef.current?.url.value;
         this.editor.updateShape({
           id: shape.id,
-          type: "preview",
+          type: "browser",
           props: { ...shape.props, url: newUrl, html: null },
         });
       }
@@ -179,7 +179,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
           const newId = `shape: ${crypto.randomUUID()}` as TLShapeId;
           this.editor.createShape({
             id: newId,
-            type: "preview",
+            type: "browser",
             x: newX,
             y: newY,
             props: {
@@ -242,8 +242,8 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
         const ancestors = this.getAncestors(shape.id);
         const deps = ancestors.map((s) => {
           return {
-            url: (s.props as PreviewShape["props"]).url,
-            html: (s.props as PreviewShape["props"]).html,
+            url: (s.props as BrowserShape["props"]).url,
+            html: (s.props as BrowserShape["props"]).html,
           };
         });
         const param = JSON.stringify(deps);
@@ -276,7 +276,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             const newUrl = formRef.current?.url.value;
             this.editor.updateShape({
               id: shape.id,
-              type: "preview",
+              type: "browser",
               props: { ...shape.props, url: newUrl, html: null },
             });
           }}
@@ -289,14 +289,19 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
               const newUrl = formRef.current?.url.value;
               this.editor.updateShape({
                 id: shape.id,
-                type: "preview",
+                type: "browser",
                 props: { ...shape.props, url: newUrl, html: null },
               });
             }}
           >
             <RotateCw />
           </Button>
-          <Input name="url" type="text" defaultValue={url} />
+          <Input
+            name="url"
+            type="text"
+            defaultValue={url}
+            placeholder="Enter a url to explore the imagined web"
+          />
           <input type="hidden" name="deps" value={depsParams} />
           <Button
             type="submit"
@@ -306,7 +311,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
               const newUrl = formRef.current?.url.value;
               this.editor.updateShape({
                 id: shape.id,
-                type: "preview",
+                type: "browser",
                 props: { ...shape.props, url: newUrl, html: null },
               });
             }}
@@ -325,7 +330,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
             }
             this.editor.updateShape({
               id: shape.id,
-              type: "preview",
+              type: "browser",
               props: { ...shape.props, html },
             });
             setIsLoading(false);
@@ -374,7 +379,7 @@ export class PreviewShapeUtil extends BaseBoxShapeUtil<PreviewShape> {
     );
   }
 
-  indicator(shape: PreviewShape) {
+  indicator(shape: BrowserShape) {
     return <rect width={shape.props.w} height={shape.props.h} />;
   }
 }

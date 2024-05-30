@@ -1,4 +1,4 @@
-type Provider = "anthropic" | "groq" | "openai";
+type Provider = "anthropic" | "groq" | "openai" | "mistral";
 
 export const SUPPORTED_MODELS = [
   // OpenAI
@@ -14,6 +14,9 @@ export const SUPPORTED_MODELS = [
   // Groq
   "llama3-70b-8192",
   "llama3-8b-8192",
+
+  // Mistral
+  "codestral-latest",
 ];
 
 export function modelToProvider(model: string): Provider {
@@ -32,6 +35,9 @@ export function modelToProvider(model: string): Provider {
     case "llama3-8b-8192":
       return "groq";
 
+    case "codestral-latest":
+      return "mistral";
+
     default:
       throw new Error(`Model ${model} not supported`);
   }
@@ -43,12 +49,15 @@ export const MODELS_GROUPED_BY_PROVIDER = SUPPORTED_MODELS.reduce(
     acc[provider].push(model);
     return acc;
   },
-  { openai: [], anthropic: [], groq: [] } as Record<Provider, string[]>
+  { openai: [], anthropic: [], groq: [], mistral: [] } as Record<
+    Provider,
+    string[]
+  >
 );
 
 export function selectKeyForModel(
   model: string,
-  keys: { openai: string; anthropic: string; groq: string }
+  keys: { openai: string; anthropic: string; groq: string; mistral: string }
 ): string {
   const provider = modelToProvider(model);
   return keys[provider];

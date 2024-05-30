@@ -1,15 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { PreviewShapeUtil } from "@/components/PreviewShape";
+import { BrowserShapeUtil } from "@/components/BrowserShape";
 import { useEditor } from "tldraw";
 import { useEffect } from "react";
+import { BottomBar } from "@/components/BottomBar";
+import { BrowserTool } from "@/tools/BrowserTool";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
 });
 
-const shapeUtils = [PreviewShapeUtil];
+const shapeUtils = [BrowserShapeUtil];
 
 export default function Home() {
   return (
@@ -18,6 +20,7 @@ export default function Home() {
         persistenceKey="tlweb"
         shapeUtils={shapeUtils}
         hideUi={false}
+        tools={[BrowserTool]}
         components={{
           Toolbar: null,
           PageMenu: null,
@@ -37,7 +40,7 @@ function UI() {
   useEffect(() => {
     if (editor.getCurrentPageShapeIds().size === 0) {
       editor.createShape({
-        type: "preview",
+        type: "browser",
         props: {
           url: "",
         },
@@ -45,25 +48,14 @@ function UI() {
     }
   }, [editor]);
 
-  return null;
+  return (
+    <>
+      <div
+        className="absolute bottom-1 left-1/2 transform -translate-x-1/2"
+        style={{ zIndex: 1000 }}
+      >
+        <BottomBar />
+      </div>
+    </>
+  );
 }
-
-// function InsertPageButton() {
-//   return (
-//     <button
-//       className="bg-blue-500 text-white font-bold py-2 px-4 rounded m-2 pointer-events-auto"
-//       onClick={() =>
-//         editor.createShape({
-//           type: "preview",
-//           props: {
-//             url: "",
-//             width: 100,
-//             height: 100,
-//           },
-//         })
-//       }
-//     >
-//       Insert Browser
-//     </button>
-//   );
-// }
