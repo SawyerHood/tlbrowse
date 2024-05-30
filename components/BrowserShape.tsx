@@ -14,7 +14,7 @@ import {
 } from "tldraw";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Play, RefreshCw, RotateCw, Download } from "lucide-react";
+import { Play, RotateCw, Download } from "lucide-react";
 
 export type BrowserShape = TLBaseShape<
   "browser",
@@ -153,6 +153,13 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
     const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
+      blurInputMobile.register();
+      return () => {
+        blurInputMobile.release();
+      };
+    }, []);
+
+    useEffect(() => {
       if (shape.props.url && !shape.props.html && !isLoading) {
         formRef.current?.submit();
         setIsLoading(true);
@@ -267,6 +274,15 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
       document.body.removeChild(link);
     };
 
+    const handleSubmit = () => {
+      const newUrl = formRef.current?.url.value;
+      this.editor.updateShape({
+        id: shape.id,
+        type: "browser",
+        props: { ...shape.props, url: newUrl, html: null },
+      });
+    };
+
     return (
       <HTMLContainer
         className="tl-embed-container flex flex-col border"
@@ -294,21 +310,20 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             });
           }}
         >
-          <Button variant="ghost" size="icon" onMouseDown={handleDownload}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onMouseDown={handleDownload}
+            onTouchStart={handleDownload}
+          >
             <Download />
           </Button>
           <Button
             type="submit"
             variant="ghost"
             size="icon"
-            onMouseDown={() => {
-              const newUrl = formRef.current?.url.value;
-              this.editor.updateShape({
-                id: shape.id,
-                type: "browser",
-                props: { ...shape.props, url: newUrl, html: null },
-              });
-            }}
+            onMouseDown={handleSubmit}
+            onTouchStart={handleSubmit}
           >
             <RotateCw />
           </Button>
@@ -316,21 +331,23 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             name="url"
             type="text"
             defaultValue={url}
+            className="address-bar"
             placeholder="Enter a url to explore the imagined web"
+            // This is to get around this code not working on mobile due to these event listeners
+            // In the use effect above we add an event listener to the document to blur this input
+            // in-spite of the fact we have a prevent default on onTouchEnd
+            // https://github.com/tldraw/tldraw/blob/main/packages/editor/src/lib/hooks/useCanvasEvents.ts#L12
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+            }}
           />
           <input type="hidden" name="deps" value={depsParams} />
           <Button
             type="submit"
             variant="ghost"
             size="icon"
-            onMouseDown={() => {
-              const newUrl = formRef.current?.url.value;
-              this.editor.updateShape({
-                id: shape.id,
-                type: "browser",
-                props: { ...shape.props, url: newUrl, html: null },
-              });
-            }}
+            onMouseDown={handleSubmit}
+            onTouchStart={handleSubmit}
           >
             <Play />
           </Button>
@@ -432,3 +449,28 @@ function getRotatedBoxShadow(rotation: number) {
 function LoadingBar() {
   return <div className="w-full h-2 bg-blue-600 animate-pulse" />;
 }
+
+class RegisterOnce {
+  private registerCount = 0;
+  constructor(private fn: () => void) {}
+  register() {
+    if (this.registerCount === 0) {
+      this.fn();
+      this.registerCount++;
+    }
+  }
+  release() {
+    this.registerCount--;
+  }
+}
+
+const blurInputMobile = new RegisterOnce(() => {
+  document.body.addEventListener("touchstart", (e) => {
+    if (!(e.target as HTMLElement).closest(".address-bar")) {
+      const activeElement = document.activeElement;
+      if (activeElement?.classList.contains("address-bar")) {
+        (activeElement as HTMLElement).blur();
+      }
+    }
+  });
+});
