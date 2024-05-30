@@ -1,5 +1,9 @@
 # tlbrowse
 
+
+https://github.com/SawyerHood/tlbrowse/assets/2380669/bcbb7ac1-c463-44ad-9adb-6be59f4c636e
+
+
 tlbrowse is an infinite canvas for the simulated web. You can create webpages by entering urls and clicking on links creates new pages. You should get incredibly funky with what imagine.
 
 You can play with the hosted version on [https://tlbrowse.com](https://tlbrowse.com)
