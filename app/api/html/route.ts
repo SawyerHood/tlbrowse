@@ -83,7 +83,7 @@ async function createProgramStream({
   };
 
   const stream = await createClient(
-    process.env.BRAINTRUST_API_KEY!
+    process.env.ANTHROPIC_API_KEY!
   ).chat.completions.create(params);
 
   return stream;

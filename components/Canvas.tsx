@@ -2,12 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { BrowserShapeUtil } from "@/components/BrowserShape";
-import { useEditor } from "tldraw";
+import { useEditor, useTLStore } from "tldraw";
 import { useEffect } from "react";
 import { BottomBar } from "@/components/BottomBar";
 import { BrowserTool } from "@/tools/BrowserTool";
 import { SignOutButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
+import { snapshot } from "@/lib/snapshot";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -41,18 +42,24 @@ function UI() {
   const editor = useEditor();
   useEffect(() => {
     if (editor.getCurrentPageShapeIds().size === 0) {
-      editor.createShape({
-        type: "browser",
-        props: {
-          url: "",
-        },
-      });
+      editor.store.loadSnapshot(snapshot);
     }
   }, [editor]);
 
   return (
     <>
-      <div className="absolute top-1 right-1" style={{ zIndex: 1000 }}>
+      <div
+        className="absolute top-1 right-1 flex gap-1"
+        style={{ zIndex: 1000 }}
+      >
+        {/* <Button
+          size="sm"
+          onClick={() => {
+            console.log(editor.store.getSnapshot());
+          }}
+        >
+          Log Snapshot
+        </Button> */}
         <SignOutButton>
           <Button size="sm">Sign Out</Button>
         </SignOutButton>
