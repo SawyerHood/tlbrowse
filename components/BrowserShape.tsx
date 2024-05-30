@@ -14,7 +14,7 @@ import {
 } from "tldraw";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Play, RefreshCw, RotateCw } from "lucide-react";
+import { Play, RefreshCw, RotateCw, Download } from "lucide-react";
 
 export type BrowserShape = TLBaseShape<
   "browser",
@@ -254,6 +254,19 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
 
     const { url } = shape.props;
 
+    // Function to handle the download of the iframe content
+    const handleDownload = () => {
+      if (!shape.props.html) return;
+      const blob = new Blob([shape.props.html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "download.html";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
     return (
       <HTMLContainer
         className="tl-embed-container flex flex-col border"
@@ -281,6 +294,9 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             });
           }}
         >
+          <Button variant="ghost" size="icon" onMouseDown={handleDownload}>
+            <Download />
+          </Button>
           <Button
             type="submit"
             variant="ghost"
