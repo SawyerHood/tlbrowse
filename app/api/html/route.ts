@@ -1,5 +1,6 @@
 import { createClient } from "@/ai/client";
 import { system } from "@/ai/prompt";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { streamHtml } from "openai-html-stream";
 
@@ -9,6 +10,15 @@ import {
 } from "openai/resources/index.mjs";
 
 export async function POST(req: NextRequest) {
+  const user = await currentUser();
+
+  if (!user) {
+    return new Response(`<h1>Unauthorized</h1><p>Log in to continue</p>`, {
+      status: 401,
+      headers: { "Content-Type": "text/html" },
+    });
+  }
+
   const formData = await req.formData();
   const url = formData.get("url")! as string;
   const rawDeps = (formData.get("deps") as string) || "[]";
