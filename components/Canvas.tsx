@@ -10,6 +10,7 @@ import { SignOutButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { snapshot } from "@/lib/snapshot";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
+import { Settings } from "@/components/Settings";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -53,14 +54,7 @@ function UI() {
         className="absolute top-1 right-1 flex gap-1"
         style={{ zIndex: 1000 }}
       >
-        {/* <Button
-          size="sm"
-          onClick={() => {
-            console.log(editor.store.getSnapshot());
-          }}
-        >
-          Log Snapshot
-        </Button> */}
+        <Settings />
         {shouldUseAuth && (
           <SignOutButton>
             <Button size="sm">Sign Out</Button>
