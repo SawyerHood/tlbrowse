@@ -4,6 +4,7 @@ import { Inter as FontSans } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
+import { shouldUseAuth } from "@/lib/shouldUseAuth";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -21,12 +22,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <Provider>
       <html lang="en">
         <body className={cn("font-sans antialiased", fontSans.variable)}>
           {children}
         </body>
       </html>
-    </ClerkProvider>
+    </Provider>
   );
+}
+
+function Provider({ children }: { children: React.ReactNode }) {
+  if (shouldUseAuth) {
+    return <ClerkProvider>{children}</ClerkProvider>;
+  }
+  return <>{children}</>;
 }
