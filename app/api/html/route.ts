@@ -1,6 +1,8 @@
 import { createClient } from "@/ai/client";
+import { modelToOpenRouter } from "@/ai/models";
 import { system } from "@/ai/prompt";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
+import { Settings } from "@/state/settings";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { streamHtml } from "openai-html-stream";
@@ -26,6 +28,7 @@ export async function POST(req: NextRequest) {
   const url = formData.get("url")! as string;
   const rawDeps = (formData.get("deps") as string) || "[]";
   const deps = JSON.parse(rawDeps);
+  const settings: Settings = JSON.parse(formData.get("settings")! as string);
   const programStream = await createProgramStream({
     url,
     // Keep only the last 3 deps
@@ -34,6 +37,7 @@ export async function POST(req: NextRequest) {
         (dep: { url: string; html?: string }) => dep.html && dep.url !== url
       )
       .slice(-3),
+    settings,
   });
 
   return new Response(
@@ -52,15 +56,17 @@ export async function POST(req: NextRequest) {
 async function createProgramStream({
   url,
   deps,
+  settings,
 }: {
   url: string;
   deps: { url: string; html: string }[];
+  settings: Settings;
 }) {
   const params: ChatCompletionCreateParamsStreaming = {
     messages: [
       {
         role: "system",
-        content: system,
+        content: settings.prompt || system,
       },
       ...deps.flatMap((dep): ChatCompletionMessageParam[] => [
         {
@@ -80,14 +86,23 @@ async function createProgramStream({
         content: url,
       },
     ],
-    model: "claude-3-haiku-20240307",
+
+    model: !settings.apiKey
+      ? "claude-3-haiku-20240307"
+      : modelToOpenRouter(settings.model),
     stream: true,
     max_tokens: 4000,
   };
 
-  const stream = await createClient(
-    process.env.ANTHROPIC_API_KEY!
-  ).chat.completions.create(params);
+  const client = createClientFromSettings(settings);
 
-  return stream;
+  return await client.chat.completions.create(params);
+}
+
+function createClientFromSettings(settings: Settings) {
+  if (!settings.apiKey) {
+    return createClient(process.env.ANTHROPIC_API_KEY!);
+  }
+
+  return createClient(settings.apiKey, "https://openrouter.ai/api/v1");
 }

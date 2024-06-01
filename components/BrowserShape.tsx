@@ -15,6 +15,8 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Play, RotateCw, Download } from "lucide-react";
+import { settingsStringAtom } from "@/state/settings";
+import { useAtomValue } from "jotai";
 
 export type BrowserShape = TLBaseShape<
   "browser",
@@ -151,6 +153,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
     const ref = useRef<HTMLIFrameElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const settings = useAtomValue(settingsStringAtom);
 
     useEffect(() => {
       blurInputMobile.register();
@@ -342,6 +345,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             }}
           />
           <input type="hidden" name="deps" value={depsParams} />
+          <input type="hidden" name="settings" value={settings} />
           <Button
             type="submit"
             variant="ghost"

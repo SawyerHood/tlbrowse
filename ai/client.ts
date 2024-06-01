@@ -1,8 +1,11 @@
 import OpenAI from "openai";
 
-export const createClient = (key: string) => {
+export const createClient = (
+  key: string,
+  baseURL: string = "https://braintrustproxy.com/v1"
+) => {
   return new OpenAI({
-    baseURL: "https://braintrustproxy.com/v1",
+    baseURL: baseURL,
     apiKey: key,
   });
 };

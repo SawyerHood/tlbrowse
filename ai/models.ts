@@ -62,3 +62,14 @@ export function selectKeyForModel(
   const provider = modelToProvider(model);
   return keys[provider];
 }
+
+export function modelToOpenRouter(model: "haiku" | "opus" | "sonnet") {
+  switch (model) {
+    case "haiku":
+      return "anthropic/claude-3-haiku";
+    case "opus":
+      return "anthropic/claude-3-opus";
+    case "sonnet":
+      return "anthropic/claude-3-sonnet";
+  }
+}
