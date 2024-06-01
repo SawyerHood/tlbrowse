@@ -181,7 +181,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
         if (event.source !== iframe?.contentWindow) {
           return;
         }
-        if (event.data.type === "linkClick") {
+        if (event.data.type === "navigate") {
           const { href } = event.data;
 
           const newX = shape.x;

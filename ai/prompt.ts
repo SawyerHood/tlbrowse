@@ -6,6 +6,7 @@ Generate the full HTML markup, including:
 - Abundant, contextually-relevant links (href="https://example.com/...") to other pages within the same expansive web, encouraging exploration
 - Interactive elements to engage the user's curiosity
 - Fanciful, wondrous content that sparks the imagination
+- If you create a form, make sure that its method is GET and a full absolute URL is specified for the action attribute
 
 Every header should contain a descriptive hyperlink. Use URL hierarchy and parameters creatively to contextualize the user's journey.
 
