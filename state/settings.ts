@@ -3,7 +3,7 @@ import { atom } from "jotai";
 
 export type Settings = {
   apiKey: string;
-  model: "haiku" | "sonnet" | "opus";
+  model: "haiku" | "sonnet" | "opus" | "gpt-4o";
   prompt: string;
 };
 

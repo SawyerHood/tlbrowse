@@ -63,7 +63,9 @@ export function selectKeyForModel(
   return keys[provider];
 }
 
-export function modelToOpenRouter(model: "haiku" | "opus" | "sonnet") {
+export function modelToOpenRouter(
+  model: "haiku" | "opus" | "sonnet" | "gpt-4o"
+) {
   switch (model) {
     case "haiku":
       return "anthropic/claude-3-haiku";
@@ -71,5 +73,7 @@ export function modelToOpenRouter(model: "haiku" | "opus" | "sonnet") {
       return "anthropic/claude-3-opus";
     case "sonnet":
       return "anthropic/claude-3-sonnet";
+    case "gpt-4o":
+      return "openai/gpt-4o";
   }
 }

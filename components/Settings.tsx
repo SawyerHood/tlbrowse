@@ -76,6 +76,7 @@ export function Settings() {
                 <SelectItem value="haiku">Haiku</SelectItem>
                 <SelectItem value="sonnet">Sonnet</SelectItem>
                 <SelectItem value="opus">Opus</SelectItem>
+                <SelectItem value="gpt-4o">GPT-4o</SelectItem>
               </SelectContent>
             </Select>
           </div>
