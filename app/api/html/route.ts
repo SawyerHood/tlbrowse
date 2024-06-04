@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
   const url = formData.get("url")! as string;
   const rawDeps = (formData.get("deps") as string) || "[]";
   const deps = JSON.parse(rawDeps);
+  const prompts = JSON.parse((formData.get("prompts")! as string) || "[]");
   const settings: Settings = JSON.parse(formData.get("settings")! as string);
   const programStream = await createProgramStream({
     url,
+    prompts,
     // Keep only the last 3 deps
     deps: deps
       .filter(
@@ -57,11 +59,22 @@ async function createProgramStream({
   url,
   deps,
   settings,
+  prompts,
 }: {
   url: string;
   deps: { url: string; html: string }[];
   settings: Settings;
+  prompts: string[];
 }) {
+  const makeMessage = (url: string) => {
+    if (!prompts.length) {
+      return `<url>${url}</url>`;
+    }
+
+    return `${prompts
+      .map((prompt) => `<directive>${prompt}</directive>`)
+      .join("\n")}\n<url>${url}</url>`;
+  };
   const params: ChatCompletionCreateParamsStreaming = {
     messages: [
       {
@@ -71,7 +84,7 @@ async function createProgramStream({
       ...deps.flatMap((dep): ChatCompletionMessageParam[] => [
         {
           role: "user",
-          content: dep.url,
+          content: makeMessage(dep.url),
         },
         {
           role: "assistant",
@@ -83,7 +96,7 @@ async function createProgramStream({
       ]),
       {
         role: "user",
-        content: url,
+        content: makeMessage(url),
       },
     ],
 

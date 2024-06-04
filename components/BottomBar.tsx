@@ -1,4 +1,4 @@
-import { Hand, MousePointer2, PanelTop } from "lucide-react";
+import { Hand, MousePointer2, PanelTop, ScrollText } from "lucide-react";
 import { Card } from "./ui/card";
 import { ToggleGroupItem, ToggleGroup } from "./ui/toggle-group";
 import { useEditor, useValue } from "tldraw";
@@ -28,6 +28,9 @@ export function BottomBar() {
         </ToggleGroupItem>
         <ToggleGroupItem value="browser" aria-label="browser">
           <PanelTop className="h-4 w-4" />
+        </ToggleGroupItem>
+        <ToggleGroupItem value="prompt" aria-label="prompt">
+          <ScrollText className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
     </Card>

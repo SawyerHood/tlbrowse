@@ -7,6 +7,7 @@ import {
   TLBaseShape,
   TLShape,
   TLShapeId,
+  TLTextShape,
   Vec,
   toDomPrecision,
   useIsEditing,
@@ -245,6 +246,21 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
       [this.editor]
     );
 
+    const promptsParam = useValue(
+      "prompts",
+      () => {
+        return JSON.stringify(
+          this.editor
+            .getCurrentPageShapes()
+            .filter((s): s is TLTextShape =>
+              Boolean(s.type === "text" && s.meta.prompt)
+            )
+            .map((t) => t.props.text)
+        );
+      },
+      [this.editor]
+    );
+
     // The deps are in top to bottom order
     const depsParams = useValue(
       "deps",
@@ -346,6 +362,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
           />
           <input type="hidden" name="deps" value={depsParams} />
           <input type="hidden" name="settings" value={settings} />
+          <input type="hidden" name="prompts" value={promptsParam} />
           <Button
             type="submit"
             variant="ghost"
@@ -451,7 +468,9 @@ function getRotatedBoxShadow(rotation: number) {
 }
 
 function LoadingBar() {
-  return <div className="w-full h-2 bg-blue-600 animate-pulse" />;
+  return (
+    <div className="w-full h-1 bg-blue-600 animate-pulse absolute top-0 left-0" />
+  );
 }
 
 class RegisterOnce {

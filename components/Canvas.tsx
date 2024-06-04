@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { snapshot } from "@/lib/snapshot";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
 import { Settings } from "@/components/Settings";
+import { PromptShapeTool } from "@/tools/PromptShapeTool";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -25,7 +26,7 @@ export function Canvas() {
         persistenceKey="tlweb"
         shapeUtils={shapeUtils}
         hideUi={false}
-        tools={[BrowserTool]}
+        tools={[BrowserTool, PromptShapeTool]}
         components={{
           Toolbar: null,
           PageMenu: null,
@@ -47,6 +48,26 @@ function UI() {
       editor.store.loadSnapshot(snapshot);
     }
   }, [editor]);
+
+  // useEffect(() => {
+  //   const unlisten = editor.store.listen(
+  //     (update) => {
+  //       for (const record of Object.values(update.changes.added)) {
+  //         if (record.typeName === "shape" && record.type === "text") {
+  //           editor.updateShape({
+  //             id: record.id,
+  //             type: record.type,
+  //             meta: {
+  //               prompt: true,
+  //             },
+  //           });
+  //         }
+  //       }
+  //     },
+  //     { scope: "document", source: "user" }
+  //   );
+  //   return unlisten;
+  // }, [editor]);
 
   return (
     <>
