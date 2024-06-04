@@ -49,26 +49,6 @@ function UI() {
     }
   }, [editor]);
 
-  // useEffect(() => {
-  //   const unlisten = editor.store.listen(
-  //     (update) => {
-  //       for (const record of Object.values(update.changes.added)) {
-  //         if (record.typeName === "shape" && record.type === "text") {
-  //           editor.updateShape({
-  //             id: record.id,
-  //             type: record.type,
-  //             meta: {
-  //               prompt: true,
-  //             },
-  //           });
-  //         }
-  //       }
-  //     },
-  //     { scope: "document", source: "user" }
-  //   );
-  //   return unlisten;
-  // }, [editor]);
-
   return (
     <>
       <div

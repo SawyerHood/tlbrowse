@@ -377,6 +377,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
           name={`iframe-1-${shape.id}`}
           id={`iframe-1-${shape.id}`}
           onLoad={(e) => {
+            if (!isLoading) return;
             const iframe = e.target as HTMLIFrameElement;
             const html = iframe.contentDocument?.documentElement.outerHTML;
             if (html === `<html><head></head><body></body></html>`) {
