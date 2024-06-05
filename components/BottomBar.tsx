@@ -20,16 +20,16 @@ export function BottomBar() {
         }}
         value={selectedTool}
       >
-        <ToggleGroupItem value="select" aria-label="Select">
+        <ToggleGroupItem value="select" aria-label="Select" title="Select">
           <MousePointer2 className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem value="hand" aria-label="hand">
+        <ToggleGroupItem value="hand" aria-label="hand" title="Pan">
           <Hand className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem value="browser" aria-label="browser">
+        <ToggleGroupItem value="browser" aria-label="browser" title="Browser">
           <PanelTop className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem value="prompt" aria-label="prompt">
+        <ToggleGroupItem value="prompt" aria-label="prompt" title="Prompt">
           <ScrollText className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
