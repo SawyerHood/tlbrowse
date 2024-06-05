@@ -6,6 +6,10 @@ tlbrowse is an infinite canvas for the simulated web. You can create webpages by
 
 You can play with the hosted version on [https://tlbrowse.com](https://tlbrowse.com)
 
+## Why?
+
+For fun! This is an experiment in new ways of brainstorming and interacting with LLMs. This is a demo, but I'm trying to poke around with new ways to play with visual outputs from LLMs. I'm really inspired about being able to latently build out an entire sitemap while browsing. Is this ready to create production ready websites? No way, but the interaction paradigm is interesting.
+
 ## Running Locally
 
 Create a `.env.local` file with the following environment variables:
