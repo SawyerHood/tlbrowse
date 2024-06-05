@@ -29,7 +29,7 @@ export function Settings() {
   return (
     <Dialog>
       <DialogTrigger asChild={true}>
-        <Button size="icon" variant="ghost">
+        <Button size="icon" variant="ghost" title="Settings">
           <SettingsIcon />
         </Button>
       </DialogTrigger>
