@@ -14,6 +14,13 @@ import {
 } from "openai/resources/index.mjs";
 
 export async function POST(req: NextRequest) {
+  const formData = await req.formData();
+  const url = formData.get("url")! as string;
+  const rawDeps = (formData.get("deps") as string) || "[]";
+  const deps = JSON.parse(rawDeps);
+  const prompts = JSON.parse((formData.get("prompts")! as string) || "[]");
+  const settings: Settings = JSON.parse(formData.get("settings")! as string);
+
   if (shouldUseAuth) {
     const user = await currentUser();
     const posthog = PostHogClient();
@@ -28,15 +35,13 @@ export async function POST(req: NextRequest) {
     posthog.capture({
       distinctId: user.id,
       event: "gen html",
+      properties: {
+        url,
+        model: settings?.model,
+      },
     });
   }
 
-  const formData = await req.formData();
-  const url = formData.get("url")! as string;
-  const rawDeps = (formData.get("deps") as string) || "[]";
-  const deps = JSON.parse(rawDeps);
-  const prompts = JSON.parse((formData.get("prompts")! as string) || "[]");
-  const settings: Settings = JSON.parse(formData.get("settings")! as string);
   const programStream = await createProgramStream({
     url,
     prompts,
