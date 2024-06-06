@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       properties: {
         url,
         model: settings?.model,
+        depth: deps.length,
       },
     });
   }
