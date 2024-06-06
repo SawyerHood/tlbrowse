@@ -1,9 +1,10 @@
 import { createClient } from "@/ai/client";
 import { modelToOpenRouter } from "@/ai/models";
 import { system } from "@/ai/prompt";
+import PostHogClient from "@/lib/postHogServer";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
 import { Settings } from "@/state/settings";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { streamHtml } from "openai-html-stream";
 
@@ -15,6 +16,7 @@ import {
 export async function POST(req: NextRequest) {
   if (shouldUseAuth) {
     const user = await currentUser();
+    const posthog = PostHogClient();
 
     if (!user) {
       return new Response(`<h1>Unauthorized</h1><p>Log in to continue</p>`, {
@@ -22,6 +24,11 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "text/html" },
       });
     }
+
+    posthog.capture({
+      distinctId: user.id,
+      event: "gen html",
+    });
   }
 
   const formData = await req.formData();

@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
+import { Analytics } from "@/components/Analytics";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en">
-        <body className={cn("font-sans antialiased", fontSans.variable)}>
-          {children}
-        </body>
+        <Analytics>
+          <body className={cn("font-sans antialiased", fontSans.variable)}>
+            {children}
+          </body>
+        </Analytics>
       </html>
     </Provider>
   );
