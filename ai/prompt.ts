@@ -7,6 +7,7 @@ Generate the full HTML markup, including:
 - Interactive elements to engage the user's curiosity
 - Fanciful, wondrous content that sparks the imagination
 - If you create a form, make sure that its method is GET and a full absolute URL is specified for the action attribute
+- Feel free to include libraries that are hosted on a CDN to make a rich, interactive, app experience
 
 Every header should contain a descriptive hyperlink. Use URL hierarchy and parameters creatively to contextualize the user's journey.
 

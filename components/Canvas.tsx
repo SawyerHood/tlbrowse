@@ -12,6 +12,7 @@ import { snapshot } from "@/lib/snapshot";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
 import { Settings } from "@/components/Settings";
 import { PromptShapeTool } from "@/tools/PromptShapeTool";
+import { breed } from "@/lib/breed";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -56,6 +57,9 @@ function UI() {
         style={{ zIndex: 1000 }}
       >
         <Settings />
+        <Button size="sm" onClick={() => breed(editor)}>
+          Breed
+        </Button>
         {shouldUseAuth && (
           <SignOutButton>
             <Button size="sm">Sign Out</Button>

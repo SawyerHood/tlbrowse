@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import { Play, RotateCw, Download } from "lucide-react";
 import { settingsStringAtom } from "@/state/settings";
 import { useAtomValue } from "jotai";
+import { makeShapeID } from "@/lib/makeShapeID";
 
 export type BrowserShape = TLBaseShape<
   "browser",
@@ -27,6 +28,7 @@ export type BrowserShape = TLBaseShape<
     h: number;
     dateCreated?: number;
     html?: string;
+    isBred?: boolean;
   }
 >;
 
@@ -152,7 +154,9 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
   override component(shape: BrowserShape) {
     const isEditing = useIsEditing(shape.id);
     const ref = useRef<HTMLIFrameElement>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(
+      shape.props.isBred && !shape.props.html
+    );
     const formRef = useRef<HTMLFormElement>(null);
     const settings = useAtomValue(settingsStringAtom);
 
@@ -187,7 +191,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
 
           const newX = shape.x;
           const newY = shape.y + shape.props.h + 100;
-          const newId = `shape: ${crypto.randomUUID()}` as TLShapeId;
+          const newId = makeShapeID();
           this.editor.createShape({
             id: newId,
             type: "browser",
