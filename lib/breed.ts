@@ -19,6 +19,17 @@ export async function breed(editor: Editor) {
     return;
   }
 
+  const urls = selectedShapes.map((s) => s.props.url);
+  const response = await fetch(`/api/breedUrl`, {
+    method: "POST",
+    body: JSON.stringify({ urls }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const offspringUrl = await response.json();
+
   const id = makeShapeID();
   editor.createShape<BrowserShape>({
     ...getPointUnder(boundingBox),
@@ -26,6 +37,7 @@ export async function breed(editor: Editor) {
     id,
     props: {
       isBred: true,
+      url: offspringUrl,
     },
   });
 

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { BrowserShapeUtil } from "@/components/BrowserShape";
 import { useEditor } from "tldraw";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BottomBar } from "@/components/BottomBar";
 import { BrowserTool } from "@/tools/BrowserTool";
 import { SignOutButton } from "@clerk/nextjs";
@@ -13,6 +13,7 @@ import { shouldUseAuth } from "@/lib/shouldUseAuth";
 import { Settings } from "@/components/Settings";
 import { PromptShapeTool } from "@/tools/PromptShapeTool";
 import { breed } from "@/lib/breed";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 const Tldraw = dynamic(async () => (await import("tldraw")).Tldraw, {
   ssr: false,
@@ -57,9 +58,7 @@ function UI() {
         style={{ zIndex: 1000 }}
       >
         <Settings />
-        <Button size="sm" onClick={() => breed(editor)}>
-          Breed
-        </Button>
+        <BreedButton />
         {shouldUseAuth && (
           <SignOutButton>
             <Button size="sm">Sign Out</Button>
@@ -73,5 +72,23 @@ function UI() {
         <BottomBar />
       </div>
     </>
+  );
+}
+
+function BreedButton() {
+  const editor = useEditor();
+  const [isBreeding, setIsBreeding] = useState(false);
+  return (
+    <Button
+      onClick={async () => {
+        setIsBreeding(true);
+        await breed(editor);
+        setIsBreeding(false);
+      }}
+      disabled={isBreeding}
+      size="sm"
+    >
+      {isBreeding ? <ReloadIcon className="h-4 w-4 animate-spin" /> : "Breed"}
+    </Button>
   );
 }

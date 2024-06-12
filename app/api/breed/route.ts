@@ -1,6 +1,5 @@
 import { createClient } from "@/ai/client";
 import { modelToOpenRouter } from "@/ai/models";
-import { system } from "@/ai/prompt";
 import PostHogClient from "@/lib/postHogServer";
 import { shouldUseAuth } from "@/lib/shouldUseAuth";
 import { Settings } from "@/state/settings";
@@ -8,10 +7,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { streamHtml } from "openai-html-stream";
 
-import {
-  ChatCompletionCreateParamsStreaming,
-  ChatCompletionMessageParam,
-} from "openai/resources/index.mjs";
+import { ChatCompletionCreateParamsStreaming } from "openai/resources/index.mjs";
 
 const makePrompt = (
   p1: string,
