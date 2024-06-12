@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   BaseBoxShapeUtil,
   HTMLContainer,
+  TLArrowShape,
   TLArrowShapeProps,
   TLBaseShape,
   TLShape,
@@ -19,6 +20,7 @@ import { Play, RotateCw, Download } from "lucide-react";
 import { settingsStringAtom } from "@/state/settings";
 import { useAtomValue } from "jotai";
 import { makeShapeID } from "@/lib/makeShapeID";
+import { connectShapes } from "@/lib/connectShapes";
 
 export type BrowserShape = TLBaseShape<
   "browser",
@@ -71,21 +73,32 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
       return [];
     }
 
-    const parentArrow = this.editor
-      .getArrowsBoundTo(shapeId)
-      .find((a) => a.handleId === "end");
-
-    if (!parentArrow) {
-      return [shape];
+    const parents = this.getParents(shapeId);
+    if (parents.length) {
+      return this.getAncestors(parents[0]).concat([shape]);
     }
 
-    const parentArrowShape = this.editor.getShape(parentArrow.arrowId);
-
-    const start = (parentArrowShape?.props as TLArrowShapeProps).start;
-    if (start.type === "binding") {
-      return this.getAncestors(start.boundShapeId).concat([shape]);
-    }
     return [shape];
+  }
+
+  getParents(shapeId: TLShapeId): TLShapeId[] {
+    const shape = this.editor.getShape(shapeId);
+    if (!shape) {
+      return [];
+    }
+    const parentShapes = this.editor
+      .getArrowsBoundTo(shapeId)
+      .filter((a) => a.handleId === "end")
+      .map((a) => {
+        const start = this.editor.getShape<TLArrowShape>(a.arrowId)!.props
+          .start;
+        if (start.type === "binding") {
+          return start.boundShapeId;
+        }
+        return null;
+      })
+      .filter((v): v is TLShapeId => Boolean(v));
+    return parentShapes;
   }
 
   layoutTree(shapeId: TLShapeId) {
@@ -154,9 +167,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
   override component(shape: BrowserShape) {
     const isEditing = useIsEditing(shape.id);
     const ref = useRef<HTMLIFrameElement>(null);
-    const [isLoading, setIsLoading] = useState(
-      shape.props.isBred && !shape.props.html
-    );
+    const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const settings = useAtomValue(settingsStringAtom);
 
@@ -168,7 +179,11 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
     }, []);
 
     useEffect(() => {
-      if (shape.props.url && !shape.props.html && !isLoading) {
+      if (
+        (shape.props.url || shape.props.isBred) &&
+        !shape.props.html &&
+        !isLoading
+      ) {
         formRef.current?.submit();
         setIsLoading(true);
         const newUrl = formRef.current?.url.value;
@@ -204,25 +219,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
             },
           });
 
-          this.editor.createShape({
-            type: "arrow",
-            props: {
-              start: {
-                type: "binding",
-                boundShapeId: shape.id,
-                normalizedAnchor: { x: 0.5, y: 1 },
-                isExact: false,
-                isPrecise: false,
-              },
-              end: {
-                type: "binding",
-                boundShapeId: newId,
-                normalizedAnchor: { x: 0.5, y: 0 },
-                isExact: false,
-                isPrecise: false,
-              },
-            },
-          });
+          connectShapes(this.editor, shape.id, newId);
 
           this.layoutTree(shape.id);
         }
@@ -269,7 +266,11 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
     const depsParams = useValue(
       "deps",
       () => {
-        const ancestors = this.getAncestors(shape.id);
+        const ancestors = shape.props.isBred
+          ? this.getParents(shape.id).map(
+              (id) => this.editor.getShape<BrowserShape>(id)!
+            )
+          : this.getAncestors(shape.id);
         const deps = ancestors.map((s) => {
           return {
             url: (s.props as BrowserShape["props"]).url,
@@ -279,7 +280,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
         const param = JSON.stringify(deps);
         return param;
       },
-      [shape.id]
+      [shape.id, shape.props.isBred]
     );
 
     const { url } = shape.props;
@@ -320,7 +321,7 @@ export class BrowserShapeUtil extends BaseBoxShapeUtil<BrowserShape> {
         <form
           method="POST"
           ref={formRef}
-          action="/api/html"
+          action={shape.props.isBred ? "/api/breed" : "/api/html"}
           target={`iframe-1-${shape.id}`}
           className="flex items-center p-2 w-full gap-2 bg-background border-b"
           onSubmit={(e) => {

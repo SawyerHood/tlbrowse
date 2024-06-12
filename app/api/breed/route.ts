@@ -56,6 +56,7 @@ Remember, the goal is a whimsical, surprising, but still functional remix of the
 `;
 
 export async function POST(req: NextRequest) {
+  console.log("breed");
   const formData = await req.formData();
   const rawDeps = (formData.get("deps") as string) || "[]";
   const deps = JSON.parse(rawDeps);
